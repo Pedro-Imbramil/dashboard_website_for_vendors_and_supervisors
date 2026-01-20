@@ -1,29 +1,21 @@
-'use client';
+import { redirect } from 'next/navigation'
+import { createSupabaseServerClient } from '@/lib/supabaseServer'
 
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+export default async function HomePage() {
+  const supabase = await createSupabaseServerClient()
 
-export default function Home() {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) {
-        window.location.href = '/login';
-      } else {
-        setUser(data.user);
-        setLoading(false);
-      }
-    });
-  }, []);
-
-  if (loading) return null;
+  if (!session) {
+    redirect('/login')
+  }
 
   return (
-    <div className="p-10">
-      <h1 className="text-2xl">Bem-vindo</h1>
-      <p>{user.email}</p>
-    </div>
-  );
+    <main>
+      <h1>Dashboard</h1>
+      <p>Usuário logado</p>
+    </main>
+  )
 }
